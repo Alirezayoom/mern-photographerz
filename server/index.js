@@ -1,15 +1,17 @@
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
-import { PhotoRouter } from "./routers/Photos.js";
+import { UserRouter } from "./routers/Users.js";
+import dotenv from "dotenv";
 
 const app = express();
+dotenv.config();
 
 app.use(express.json());
 app.use(cors());
-app.use("/api/photos", PhotoRouter);
+app.use("/api/users", UserRouter);
 
-mongoose.connect("mongodb://localhost:27017/photographerz");
+mongoose.connect(process.env.MONGO_URL);
 const db = mongoose.connection;
 db.on("error", (err) => console.error(err));
 db.once("open", () => console.log("connect to db"));
