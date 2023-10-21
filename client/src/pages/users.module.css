@@ -48,3 +48,24 @@
   color: #fff8;
   font-size: 0.875rem;
 }
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  margin: 4rem 0;
+}
+
+.pagination button {
+  background-color: #333;
+  border: 0;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+.pagination button:disabled {
+  background-color: #3338;
+  cursor: no-drop;
+}
