@@ -3,18 +3,43 @@ import { UserModel } from "../models/Users.js";
 
 const router = express.Router();
 
-router.get("/", async (req, res) => {
+router.post("/", async (req, res) => {
   const page = +req.query.page - 1 || 0;
   const pageSize = 16;
 
-  const data = await UserModel.find()
+  const { photographer } = await req.body;
+  const allPhotographers = await UserModel.find({})
     .skip(page * pageSize)
     .limit(pageSize);
+
+  const foundPhotographers = await UserModel.find({
+    firstName: { $regex: photographer, $options: "i" },
+  });
+  const photographers = await UserModel.find({
+    firstName: { $regex: photographer, $options: "i" },
+  })
+    .skip(page * pageSize)
+    .limit(pageSize);
+
+  if (photographer === "") {
+    return res.json({
+      data: allPhotographers,
+      meta: {
+        page: Number(page) + 1,
+        pageCount: Math.ceil(foundPhotographers.length / pageSize),
+      },
+    });
+  }
+
+  if (!photographer) {
+    return console.log("not found");
+  }
+
   res.json({
-    data,
+    data: photographers,
     meta: {
       page: Number(page) + 1,
-      pageCount: Math.ceil((await UserModel.countDocuments()) / pageSize),
+      pageCount: Math.ceil(foundPhotographers.length / pageSize),
     },
   });
 });
