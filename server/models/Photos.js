@@ -1,10 +1,14 @@
 import mongoose from "mongoose";
 
 const PhotoSchema = mongoose.Schema({
-  name: { type: String },
-  lastname: { type: String },
-  avatar: { type: String },
-  photo: { type: String },
+  owner: {
+    type: mongoose.Schema.Types.String,
+    refs: "users",
+    required: true,
+  },
+  name: { type: String, required: true },
+  photo: { type: String, required: true },
+  publishedAt: Date,
 });
 
 export const PhotoModel = mongoose.model("photos", PhotoSchema);
