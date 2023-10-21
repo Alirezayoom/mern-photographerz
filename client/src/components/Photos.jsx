@@ -1,23 +1,23 @@
 import { useState, useEffect } from "react";
-import classes from "./users.module.css";
 import { useSearchParams } from "react-router-dom";
+import classes from "./photos.module.css";
 
-const Users = () => {
+const Photos = () => {
+  const [data, setData] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams({ page: 1 });
   const [name, setName] = useState("");
-  const [data, setData] = useState([]);
 
   useEffect(() => {
-    const fetchUsers = async () => {
+    const fetchPhotos = async () => {
       const data = await fetch(
-        `http://localhost:5000/api/users?${searchParams}`,
+        `http://localhost:5000/api/photos?${searchParams}`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            photographer: name,
+            photo: name,
           }),
         }
       );
@@ -25,7 +25,7 @@ const Users = () => {
       setData(json);
     };
 
-    fetchUsers();
+    fetchPhotos();
   }, [name, searchParams]);
 
   return (
@@ -40,22 +40,27 @@ const Users = () => {
       >
         <input type="text" placeholder="Search Photographer..." />
       </div>
-
-      <div className={classes.users}>
-        {data?.data?.map((user) => (
-          <div key={user._id} className={classes.user}>
-            <div className={classes.avatar}>
-              <img src={user.avatar} alt="avatar" />
+      <div className={classes.photos}>
+        {data?.data?.map((photo) => (
+          <div key={photo._id} className={classes.card}>
+            <div className={classes.photo}>
+              <img src={photo.photo} alt="nice shot" />
             </div>
 
-            <div className={classes.username}>@{user.username}</div>
-
-            <div className={classes.info}>
-              <div>{user.firstName}</div>
-              <div>{user.lastName}</div>
+            <div>
+              <div className={classes.name}>{photo.name}</div>
+              <div className={classes.ownerInfo}>
+                <div className={classes.avatar}>
+                  <img src={photo.avatar} alt="avatar" />
+                </div>
+                <div>
+                  <div className={classes.owner}>{photo.owner}</div>
+                  <div className={classes.publishedAt}>
+                    {new Date(photo.publishedAt).toLocaleDateString()}
+                  </div>
+                </div>
+              </div>
             </div>
-
-            <div className={classes.email}>{user.email}</div>
           </div>
         ))}
       </div>
@@ -91,4 +96,4 @@ const Users = () => {
   );
 };
 
-export default Users;
+export default Photos;

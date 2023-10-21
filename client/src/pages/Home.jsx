@@ -1,5 +1,11 @@
+import Photos from "../components/Photos";
+
 const Home = () => {
-  return <div>Home</div>;
+  return (
+    <div className="container">
+      <Photos />
+    </div>
+  );
 };
 
 export default Home;
