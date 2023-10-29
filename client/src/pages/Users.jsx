@@ -8,24 +8,29 @@ const Users = () => {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      const data = await fetch(
-        `http://localhost:5000/api/users?${searchParams}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            photographer: name,
-          }),
-        }
-      );
-      const json = await data.json();
-      setData(json);
-    };
+    const indentifier = setTimeout(() => {
+      const fetchUsers = async () => {
+        const data = await fetch(
+          `http://localhost:5000/api/users?${searchParams}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              photographer: name,
+            }),
+          }
+        );
+        const json = await data.json();
+        setData(json);
+      };
+      fetchUsers();
+    }, 500);
 
-    fetchUsers();
+    return () => {
+      clearTimeout(indentifier);
+    };
   }, [name, searchParams]);
 
   return (

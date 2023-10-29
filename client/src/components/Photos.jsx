@@ -8,24 +8,30 @@ const Photos = () => {
   const [name, setName] = useState("");
 
   useEffect(() => {
-    const fetchPhotos = async () => {
-      const data = await fetch(
-        `http://localhost:5000/api/photos?${searchParams}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            photo: name,
-          }),
-        }
-      );
-      const json = await data.json();
-      setData(json);
-    };
+    const identifier = setTimeout(() => {
+      const fetchPhotos = async () => {
+        const data = await fetch(
+          `http://localhost:5000/api/photos?${searchParams}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              photo: name,
+            }),
+          }
+        );
+        const json = await data.json();
+        setData(json);
+      };
 
-    fetchPhotos();
+      fetchPhotos();
+    }, 500);
+
+    return () => {
+      clearTimeout(identifier);
+    };
   }, [name, searchParams]);
 
   return (
