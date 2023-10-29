@@ -47,6 +47,7 @@ const Users = () => {
       </div>
 
       <div className={classes.users}>
+        {!data.data && <Loading />}
         {data?.data?.map((user) => (
           <div key={user._id} className={classes.user}>
             <div className={classes.avatar}>
@@ -97,3 +98,37 @@ const Users = () => {
 };
 
 export default Users;
+
+const Loading = () => {
+  const items = [1, 2, 3, 4, 5, 6, 7, 8];
+  return (
+    <>
+      {items?.map(() => (
+        <div key={Math.random()} className={`${classes.user}, pulse`}>
+          <div
+            className={classes.avatar}
+            style={{
+              width: "150px",
+              height: "150px",
+              backgroundColor: "#fff2",
+            }}
+          ></div>
+
+          <div
+            className={classes.username}
+            style={{ width: "150px", height: "20px", backgroundColor: "#fff2" }}
+          ></div>
+          <div
+            style={{
+              width: "150px",
+              height: "20px",
+              backgroundColor: "#fff2",
+              margin: "0 auto",
+              borderRadius: "1rem",
+            }}
+          ></div>
+        </div>
+      ))}
+    </>
+  );
+};

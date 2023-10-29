@@ -52,3 +52,19 @@ body {
   background-color: #333;
   font-size: 1rem;
 }
+
+.pulse {
+  animation: thepulse 3s infinite;
+}
+
+@keyframes thepulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
