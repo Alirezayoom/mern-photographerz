@@ -1,64 +1,70 @@
 import { useState, useEffect } from "react";
 import classes from "./users.module.css";
-import { useSearchParams } from "react-router-dom";
 
-const Users = () => {
-  const [searchParams, setSearchParams] = useSearchParams({ page: 1 });
-  const [name, setName] = useState("");
-  const [data, setData] = useState([]);
+export default function Users() {
+  const [users, setUsers] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const indentifier = setTimeout(() => {
-      const fetchUsers = async () => {
-        const data = await fetch(
-          `http://localhost:5000/api/users?${searchParams}`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              photographer: name,
-            }),
-          }
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/users?page=${page}&photographer=${searchTerm}`
         );
-        const json = await data.json();
-        setData(json);
-      };
-      fetchUsers();
-    }, 500);
-
-    return () => {
-      clearTimeout(indentifier);
+        if (!response.ok) {
+          throw new Error("Failed to fetch users");
+        }
+        const data = await response.json();
+        setUsers(data.data);
+        setTotalPages(data.meta.pageCount);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        setLoading(false);
+      }
     };
-  }, [name, searchParams]);
+
+    fetchUsers();
+  }, [page, searchTerm]);
+
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
+    setPage(1);
+  };
+
+  const handlePagination = (direction) => {
+    if (direction === "prev" && page > 1) {
+      setPage((prevPage) => prevPage - 1);
+    } else if (direction === "next") {
+      setPage((prevPage) => prevPage + 1);
+    }
+  };
 
   return (
     <div>
-      <div
-        className="search"
-        value={name}
-        onChange={(e) => {
-          setName(e.target.value);
-          setSearchParams({ page: 1 });
-        }}
-      >
-        <input type="text" placeholder="Search Photographer..." />
+      <div className="search">
+        <input
+          type="text"
+          placeholder="Search Photographer..."
+          value={searchTerm}
+          onChange={handleSearch}
+        />
       </div>
 
       <div className={classes.users}>
-        {!data.data && <Loading />}
-        {data?.data?.map((user) => (
+        {loading && <Loading />}
+        {users.map((user) => (
           <div key={user._id} className={classes.user}>
             <div className={classes.avatar}>
               <img src={user.avatar} alt="avatar" />
             </div>
-
             <div className={classes.username}>@{user.username}</div>
-
             <div className={classes.info}>
-              <div>{user.firstName}</div>
-              <div>{user.lastName}</div>
+              <p>{user.firstName}</p>
+              <p>{user.lastName}</p>
             </div>
 
             <div className={classes.email}>{user.email}</div>
@@ -67,37 +73,24 @@ const Users = () => {
       </div>
 
       <div className="pagination">
-        <button onClick={() => setSearchParams({ page: 1 })}>first page</button>
-        <button
-          disabled={+searchParams.get("page") === 1}
-          onClick={() =>
-            setSearchParams({ page: +searchParams.get("page") - 1 })
-          }
-        >
-          prev
+        <button onClick={() => setPage(1)}>first page</button>
+        <button onClick={() => handlePagination("prev")} disabled={page === 1}>
+          Previous
         </button>
-        <div>
-          page {+data?.meta?.page} of {+data?.meta?.pageCount}
-        </div>
+        <span>
+          Page {page} of {totalPages}
+        </span>
         <button
-          disabled={+searchParams.get("page") === data?.meta?.pageCount}
-          onClick={() =>
-            setSearchParams({ page: +searchParams.get("page") + 1 })
-          }
+          onClick={() => handlePagination("next")}
+          disabled={page === totalPages}
         >
-          next
+          Next
         </button>
-        <button
-          onClick={() => setSearchParams({ page: +data?.meta?.pageCount })}
-        >
-          last page
-        </button>
+        <button onClick={() => setPage(totalPages)}>last page</button>
       </div>
     </div>
   );
-};
-
-export default Users;
+}
 
 const Loading = () => {
   const items = [1, 2, 3, 4, 5, 6, 7, 8];

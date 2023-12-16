@@ -3,45 +3,34 @@ import { UserModel } from "../models/Users.js";
 
 const router = express.Router();
 
-router.post("/", async (req, res) => {
-  const page = +req.query.page - 1 || 0;
-  const pageSize = 16;
+router.get("/", async (req, res) => {
+  try {
+    const page = +req.query.page - 1 || 0;
+    const pageSize = 16;
+    const { photographer } = req.query;
 
-  const { photographer } = await req.body;
-  const allPhotographers = await UserModel.find({})
-    .skip(page * pageSize)
-    .limit(pageSize);
+    const query = photographer
+      ? { firstName: { $regex: photographer, $options: "i" } }
+      : {};
 
-  const foundPhotographers = await UserModel.find({
-    firstName: { $regex: photographer, $options: "i" },
-  });
-  const photographers = await UserModel.find({
-    firstName: { $regex: photographer, $options: "i" },
-  })
-    .skip(page * pageSize)
-    .limit(pageSize);
+    const totalCount = await UserModel.countDocuments(query);
+    const totalPages = Math.ceil(totalCount / pageSize);
 
-  if (photographer === "") {
-    return res.json({
-      data: allPhotographers,
+    const users = await UserModel.find(query)
+      .skip(page * pageSize)
+      .limit(pageSize);
+
+    res.json({
+      data: users,
       meta: {
-        page: Number(page) + 1,
-        pageCount: Math.ceil(foundPhotographers.length / pageSize),
+        page: page + 1,
+        pageCount: totalPages,
       },
     });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal server error" });
   }
-
-  if (!photographer) {
-    return console.log("not found");
-  }
-
-  res.json({
-    data: photographers,
-    meta: {
-      page: Number(page) + 1,
-      pageCount: Math.ceil(foundPhotographers.length / pageSize),
-    },
-  });
 });
 
 export { router as UserRouter };
