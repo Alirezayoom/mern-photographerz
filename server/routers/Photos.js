@@ -3,46 +3,32 @@ import { PhotoModel } from "../models/Photos.js";
 
 const router = express.Router();
 
-router.post("/", async (req, res) => {
-  const page = +req.query.page - 1 || 0;
-  const pageSize = 24;
+router.get("/", async (req, res) => {
+  try {
+    const page = +req.query.page - 1 || 0;
+    const pageSize = 15;
+    const { photo } = req.query;
 
-  const { photo } = await req.body;
+    const query = photo ? { name: { $regex: photo, $options: "i" } } : {};
 
-  const allPhotos = await PhotoModel.find({})
-    .skip(page * pageSize)
-    .limit(pageSize);
+    const totalCount = await PhotoModel.countDocuments(query);
+    const totalPages = Math.ceil(totalCount / pageSize);
 
-  const foundPhotos = await PhotoModel.find({
-    name: { $regex: photo, $options: "i" },
-  });
-  const photos = await PhotoModel.find({
-    name: { $regex: photo, $options: "i" },
-  })
-    .skip(page * pageSize)
-    .limit(pageSize);
+    const photos = await PhotoModel.find(query)
+      .skip(page * pageSize)
+      .limit(pageSize);
 
-  if (photo === "") {
-    return res.json({
-      data: allPhotos,
+    res.json({
+      data: photos,
       meta: {
-        page: Number(page) + 1,
-        pageCount: Math.ceil(foundPhotos.length / pageSize),
+        page: page + 1,
+        pageCount: totalPages,
       },
     });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal server error" });
   }
-
-  if (!photo) {
-    return console.log("not found");
-  }
-
-  res.json({
-    data: photos,
-    meta: {
-      page: Number(page) + 1,
-      pageCount: Math.ceil(foundPhotos.length / pageSize),
-    },
-  });
 });
 
 export { router as PhotoRouter };

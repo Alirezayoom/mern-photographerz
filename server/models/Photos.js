@@ -1,11 +1,7 @@
 import mongoose from "mongoose";
 
 const PhotoSchema = mongoose.Schema({
-  owner: {
-    type: mongoose.Schema.Types.String,
-    refs: "users",
-    required: true,
-  },
+  owner: { type: String },
   name: { type: String, required: true },
   photo: { type: String, required: true },
   publishedAt: Date,
