@@ -12,7 +12,7 @@ export default function Users() {
     const fetchUsers = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/users?page=${page}&photographer=${searchTerm}`
+          `https://photographerz.onrender.com/api/users?page=${page}&photographer=${searchTerm}`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch users");
