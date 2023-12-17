@@ -12,7 +12,8 @@
 }
 
 .avatar {
-  max-width: 150px;
+  width: 150px;
+  height: 150px;
   border-radius: 9rem;
   overflow: hidden;
   margin: 0 auto 1rem;
