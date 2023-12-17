@@ -6,7 +6,7 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   try {
     const page = +req.query.page - 1 || 0;
-    const pageSize = 16;
+    const pageSize = 20;
     const { photographer } = req.query;
 
     const query = photographer

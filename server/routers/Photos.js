@@ -6,7 +6,7 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   try {
     const page = +req.query.page - 1 || 0;
-    const pageSize = 15;
+    const pageSize = 24;
     const { photo } = req.query;
 
     const query = photo ? { name: { $regex: photo, $options: "i" } } : {};
