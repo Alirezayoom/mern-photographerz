@@ -6,7 +6,11 @@ const Navbar = () => {
     <nav className={classes.navbar}>
       <div className={`${classes.container} container`}>
         <div>
-          <Link to="/" style={{ display: "flex", alignItems: "center" }}>
+          <Link
+            to="/"
+            aria-label="home"
+            style={{ display: "flex", alignItems: "center" }}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="32"
