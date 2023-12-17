@@ -1,66 +1,75 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
 import classes from "./photos.module.css";
 
 const Photos = () => {
-  const [data, setData] = useState([]);
-  const [searchParams, setSearchParams] = useSearchParams({ page: 1 });
-  const [name, setName] = useState("");
+  const [images, setImages] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const identifier = setTimeout(() => {
-      const fetchPhotos = async () => {
-        const data = await fetch(
-          `http://localhost:5000/api/photos?${searchParams}`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              photo: name,
-            }),
-          }
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch(
+          `https://photographerz.onrender.com/api/photos?page=${page}&photo=${searchTerm}`
         );
-        const json = await data.json();
-        setData(json);
-      };
-
-      fetchPhotos();
-    }, 500);
-
-    return () => {
-      clearTimeout(identifier);
+        if (!response.ok) {
+          throw new Error("Failed to fetch images");
+        }
+        const data = await response.json();
+        setImages(data.data);
+        setTotalPages(data.meta.pageCount);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching images:", error);
+        setLoading(false);
+      }
     };
-  }, [name, searchParams]);
+
+    fetchUsers();
+  }, [page, searchTerm]);
+
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
+    setPage(1);
+  };
+
+  const handlePagination = (direction) => {
+    if (direction === "prev" && page > 1) {
+      setPage((prevPage) => prevPage - 1);
+    } else if (direction === "next") {
+      setPage((prevPage) => prevPage + 1);
+    }
+  };
 
   return (
     <div>
-      <div
-        className="search"
-        value={name}
-        onChange={(e) => {
-          setName(e.target.value);
-          setSearchParams({ page: 1 });
-        }}
-      >
-        <input type="text" placeholder="Search Photographer..." />
+      <div className="search">
+        <input
+          type="text"
+          placeholder="Search Photo..."
+          value={searchTerm}
+          onChange={handleSearch}
+        />
       </div>
+
       <div className={classes.photos}>
-        {data?.data?.map((photo) => (
+        {loading && <Loading />}
+        {images.map((photo) => (
           <div key={photo._id} className={classes.card}>
             <div className={classes.photo}>
               <img src={photo.photo} alt="nice shot" />
             </div>
 
-            <div>
+            <div className={classes.info}>
               <div className={classes.name}>{photo.name}</div>
               <div className={classes.ownerInfo}>
-                <div className={classes.avatar}>
+                {/* <div className={classes.avatar}>
                   <img src={photo.avatar} alt="avatar" />
-                </div>
+                </div> */}
                 <div>
-                  <div className={classes.owner}>{photo.owner}</div>
+                  <div className={classes.owner}>By: {photo.owner}</div>
                   <div className={classes.publishedAt}>
                     {new Date(photo.publishedAt).toLocaleDateString()}
                   </div>
@@ -72,34 +81,70 @@ const Photos = () => {
       </div>
 
       <div className="pagination">
-        <button onClick={() => setSearchParams({ page: 1 })}>first page</button>
-        <button
-          disabled={+searchParams.get("page") === 1}
-          onClick={() =>
-            setSearchParams({ page: +searchParams.get("page") - 1 })
-          }
-        >
-          prev
+        <button onClick={() => setPage(1)}>first page</button>
+        <button onClick={() => handlePagination("prev")} disabled={page === 1}>
+          Previous
         </button>
-        <div>
-          page {+data?.meta?.page} of {+data?.meta?.pageCount}
-        </div>
+        <span>
+          Page {page} of {totalPages}
+        </span>
         <button
-          disabled={+searchParams.get("page") === data?.meta?.pageCount}
-          onClick={() =>
-            setSearchParams({ page: +searchParams.get("page") + 1 })
-          }
+          onClick={() => handlePagination("next")}
+          disabled={page === totalPages}
         >
-          next
+          Next
         </button>
-        <button
-          onClick={() => setSearchParams({ page: +data?.meta?.pageCount })}
-        >
-          last page
-        </button>
+        <button onClick={() => setPage(totalPages)}>last page</button>
       </div>
     </div>
   );
 };
 
 export default Photos;
+
+const Loading = () => {
+  const items = [1, 2, 3, 4, 5, 6];
+  return (
+    <>
+      {items?.map((item) => (
+        <div key={item._id} className={`${classes.card}, pulse`}>
+          <div
+            className={classes.photo}
+            style={{ backgroundColor: "#292929" }}
+          ></div>
+
+          <div
+            className={classes.info}
+            style={{ height: "90px", backgroundColor: "#333" }}
+          >
+            <div className={classes.name} />
+            <div className={classes.ownerInfo}>
+              <div>
+                <div
+                  className={classes.owner}
+                  style={{
+                    height: "1rem",
+                    width: "200px",
+                    backgroundColor: "#555",
+                    borderRadius: "1rem",
+                    marginBottom: "10px",
+                  }}
+                />
+                <div
+                  className={classes.owner}
+                  style={{
+                    height: "1rem",
+                    width: "160px",
+                    backgroundColor: "#555",
+                    borderRadius: "1rem",
+                    marginBottom: "8px",
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </>
+  );
+};
